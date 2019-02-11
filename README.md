@@ -28,6 +28,19 @@ Running the Honeypot
 docker run -p 80:80 --name "mystrutspot_docker" -d struts_honeypot
 
 
+hpfeeds logging
+------------------
+Optionally, logging to an hpfeeds broker can be enabled by setting the following environment variables.
+
+    HPFEEDS_SERVER:    hpfeeds Server
+    HPFEEDS_PORT:      hpfeeds Port
+    HPFEEDS_IDENT:     hpfeeds Ident
+    HPFEEDS_SECRET:    hpfeeds Secret
+    HPFEEDS_CHANNEL:   hpfeeds Channel
+    SERVERID:          hpfeeds ServerID/ServerName
+
+All requests (benign and malicious) will be logged to hpfeeds.
+
 Accessing the logs
 ------------------
 Run 'docker ps' to validate the docker name: "mystrutspot_docker"
@@ -42,9 +55,9 @@ Prerequisites
 
 Rebuilding the Honeypot
 -----------------------
-docker kill mystrutspot_docker
-docker rm mystrutspot_docker
-docker build -t struts_honeypot strutspot_docker/
+- docker kill mystrutspot_docker
+- docker rm mystrutspot_docker
+- docker build -t struts_honeypot strutspot_docker/
 
 Then use test-struts2.py like below:
 

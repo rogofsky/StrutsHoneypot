@@ -1,4 +1,8 @@
-<?php 
+<?php
+
+date_default_timezone_set('UTC');
+$timenow = new DateTime();
+$timestr = $timenow->format('Y-m-d\TH:i:s.u');
 
 $NEVER_USED_NAME_CHARS_REGEX = "/(%{|#)/";
 $CONTENT_TYPE_DISPOSITION_INDICATOR_REGEX = "/multipart\/form-data;\s+?boundary=(.+?)$/";
@@ -7,7 +11,7 @@ $CONTENT_DISPOSITION_PARSING_REGEX_END = "((?!(\r\n\r\n|\n\n)).)*?(\r\n|\n){0,1}
 $hdrs = apache_request_headers();
 
 $ct = ""; $ua = ""; $con_disp = "";
-$match = 0; $raw_post_data = "";
+$match = 0; $post_data = "";
 
 //for debugging purposes: print("<!doctype html><html><body><pre>\n");
 //check case insensitive headers.
@@ -35,9 +39,8 @@ foreach ($hdrs as $name => $value) {
 				}
 			}
 		}
-
 	}
-	elseif ('user-agent' == strtolower($name)) {
+	if ('user-agent' == strtolower($name)) {
 		$ua = $hdrs[$name];
 	}
 }
@@ -51,7 +54,53 @@ if ($match == 1) {
 	$msg = json_encode($marr);
 	//send to apache/php default error log
 	error_log($msg);
+
+	//extra hpfeeds variables
+	$classification = "exploit";
+	$vulnerability = "CVE-2017-5638";
+	if (empty($con_disp)) {
+		if (empty($ct)) {
+			$exploit_payload = NULL;
+		}
+		else {
+			$exploit_payload = $ct;
+		}
+	}
+	else {
+		$exploit_payload = $con_disp;
+	}
 }
+else {
+	$classification = "request";
+	$vulnerability = NULL;
+	$exploit_payload = NULL;
+}
+
+//log to hpfeeds (if configured)
+if (getenv("HPFEEDS_SERVER") !== FALSE) {
+	$raw_requestline = sprintf(
+		"%s %s %s\r\n",
+		$_SERVER['REQUEST_METHOD'],
+		$_SERVER['REQUEST_URI'],
+		$_SERVER['SERVER_PROTOCOL']
+	);
+	$hpfl = [
+		"classification" => $classification,
+		"timestamp" => $timestr,
+		"vulnerability" => $vulnerability,
+		"src_ip" => $_SERVER['REMOTE_ADDR'],
+		"src_port" => $_SERVER['REMOTE_PORT'],
+		"dest_ip" => $_SERVER['SERVER_ADDR'],
+		"dest_port" => $_SERVER['SERVER_PORT'],
+		"raw_requestline" => $raw_requestline,
+		"header" => $hdrs,
+		"postdata" => (empty($post_data)) ? NULL: $post_data,
+		"exploit_payload" => $exploit_payload,
+	];
+	$enc_msg = escapeshellarg(base64_encode(json_encode($hpfl)));
+	shell_exec(dirname(__FILE__) . DIRECTORY_SEPARATOR . "hpfeeds.py --msg " . $enc_msg);
+}
+
 //for debugging purposes: print("</pre></body></html>\n");
 //exit(0);
 ?>
