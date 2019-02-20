@@ -98,7 +98,7 @@ if (getenv("HPFEEDS_SERVER") !== FALSE) {
 		"exploit_payload" => $exploit_payload,
 	];
 	$enc_msg = escapeshellarg(base64_encode(json_encode($hpfl)));
-	shell_exec(dirname(__FILE__) . DIRECTORY_SEPARATOR . "hpfeeds.py --msg " . $enc_msg);
+	shell_exec(dirname(__FILE__) . DIRECTORY_SEPARATOR . "hpf.py --msg " . $enc_msg);
 }
 
 //for debugging purposes: print("</pre></body></html>\n");

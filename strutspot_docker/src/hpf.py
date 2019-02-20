@@ -19,6 +19,8 @@ class hpflogger:
 		self.serverid = serverid
 		self.hpc = None
 		if (self.hpfserver and self.hpfport and self.hpfident and self.hpfport and self.hpfchannel and self.serverid):
+			import logging
+			logging.basicConfig()
 			import hpfeeds
 			try:
 				self.hpc = hpfeeds.new(self.hpfserver, self.hpfport, self.hpfident, self.hpfsecret)
@@ -48,7 +50,7 @@ if __name__ == '__main__':
 			]
 		if all(var in os.environ for var in environreq):
 			hpfserver = os.environ.get('HPFEEDS_SERVER')
-			hpfport = os.environ.get('HPFEEDS_PORT')
+			hpfport = int(os.environ.get('HPFEEDS_PORT'))
 			hpfident = os.environ.get('HPFEEDS_IDENT')
 			hpfsecret = os.environ.get('HPFEEDS_SECRET')
 			hpfchannel = os.environ.get('HPFEEDS_CHANNEL')
